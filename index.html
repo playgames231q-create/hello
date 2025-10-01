@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+  /* Extra directions for floating emojis */
+  @keyframes floatDown{
+    0%   { transform:translateY(-20vh) scale(.8) rotate(0deg); opacity:0 }
+    10%  { opacity:.85 }
+    100% { transform:translateY(110vh) scale(1.1) rotate(12deg); opacity:0 }
+  }
+  @keyframes floatRight{
+    0%   { transform:translateX(-20vw) scale(.8) rotate(0deg); opacity:0 }
+    10%  { opacity:.85 }
+    100% { transform:translateX(110vw) scale(1.1) rotate(12deg); opacity:0 }
+  }
+  @keyframes floatLeft{
+    0%   { transform:translateX(20vw) scale(.8) rotate(0deg); opacity:0 }
+    10%  { opacity:.85 }
+    100% { transform:translateX(-110vw) scale(1.1) rotate(12deg); opacity:0 }
+  }
+</style>
+<script>
+  (function(){
+    // Ensure extra keyframes exist
+    const styleId = "multi-float-keyframes";
+    if(!document.getElementById(styleId)){
+      const css = `
+        @keyframes floatDown{0%{transform:translateY(-20vh) scale(.8) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translateY(110vh) scale(1.1) rotate(12deg);opacity:0}}
+        @keyframes floatRight{0%{transform:translateX(-20vw) scale(.8) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translateX(110vw) scale(1.1) rotate(12deg);opacity:0}}
+        @keyframes floatLeft{0%{transform:translateX(20vw) scale(.8) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translateX(-110vw) scale(1.1) rotate(12deg);opacity:0}}
+      `;
+      const s = document.createElement("style");
+      s.id = styleId; s.textContent = css;
+      document.head.appendChild(s);
+    }
+
+    function createFloatFrom(edge){
+      const el = document.createElement("div");
+      el.className = "float";
+      el.textContent = FLOAT_EMOJIS[Math.floor(Math.random()*FLOAT_EMOJIS.length)];
+      el.style.color = FLOAT_COLORS[Math.floor(Math.random()*FLOAT_COLORS.length)];
+      el.style.position = "fixed";
+      el.style.zIndex = "9";
+      el.style.pointerEvents = "none";
+      const duration = 6 + Math.random()*5;
+      el.style.animationDuration = duration + "s";
+      el.style.filter = "drop-shadow(0 4px 12px rgba(255,122,162,.35))";
+      el.style.willChange = "transform, opacity";
+      const scale = 0.7 + Math.random()*0.6;
+      const rot = -10 + Math.random()*20;
+
+      if(edge === "top"){
+        el.style.left = (Math.random()*100) + "vw";
+        el.style.top = "-10vh";
+        el.style.animationName = "floatDown";
+      } else if(edge === "left"){
+        el.style.top = (Math.random()*100) + "vh";
+        el.style.left = "-10vw";
+        el.style.animationName = "floatRight";
+      } else if(edge === "right"){
+        el.style.top = (Math.random()*100) + "vh";
+        el.style.left = "110vw";
+        el.style.animationName = "floatLeft";
+      } else {
+        el.style.left = (Math.random()*100) + "vw";
+        el.style.bottom = "-10vh";
+        el.style.animationName = "floatUp";
+      }
+
+      el.style.transform = `scale(${scale}) rotate(${rot}deg)`;
+      (document.getElementById("float") || document.body).appendChild(el);
+      setTimeout(()=> el.remove(), duration*1000);
+    }
+    const oldBtn = document.getElementById("btnHearts");
+    if(oldBtn){
+      const btn = oldBtn.cloneNode(true);
+      oldBtn.parentNode.replaceChild(btn, oldBtn);
+
+      btn.addEventListener("click", ()=>{
+        const edges = ["bottom","top","left","right"];
+        const total = 1000;      // more emojis per click
+        const cadenceMs = 500;   
+        for(let i=0;i<total;i++){
+          setTimeout(()=>{
+            createFloatFrom(edges[Math.floor(Math.random()*edges.length)]);
+          }, i*cadenceMs);
+        }
+      });
+    }
+  })();
+</script>
+
+    <style>
+  /* De-clutter spacing */
+  .content{ gap:28px; }
+  @media (min-width: 980px){ .content{ gap:32px; } }
+  .panel{ box-shadow: 0 8px 22px rgba(53,39,50,.08); }
+
+  /* Envelope visibility fix (keeps your design) */
+  .envelope{ cursor:pointer; }
+  .env-inner{ isolation:isolate; }
+  .env-flap{ z-index:3; }
+  .note{ z-index:2; position:absolute; }
+  .envelope.open .env-flap{ pointer-events:none; }
+
+  /* Teddy gallery: clean grid, visible images */
+  .teddy-wrap{ position:relative; z-index:2; }
+  .teddy-head{ margin-bottom:14px; }
+  .teddy-row{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+    gap:14px;
+    overflow:visible;
+  }
+  .teddy-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:14px;
+  }
+  @media (max-width: 600px){
+    .teddy-grid{ grid-template-columns: 1fr; }
+  }
+  .teddy{
+    background:rgba(255,255,255,.92);
+    border:1px solid #fff;
+    border-radius:16px;
+    overflow:hidden;
+    position:relative;
+    box-shadow: 0 8px 18px rgba(53,39,50,.10);
+  }
+  .teddy img{
+    display:block;
+    width:100%;
+    aspect-ratio: 4/3;
+    object-fit:cover;
+    background:#fff;
+  }
+  .tcap{
+    position:static;
+    margin:8px;
+    background:rgba(255,255,255,.85);
+    border:1px solid #fff;
+    border-radius:10px;
+    padding:6px 9px;
+    font-size:12px;
+    color:#7a5a69;
+  }
+  /* Cute diary styling */
+  .diary{
+    min-height:160px;
+    background: radial-gradient(120% 140% at 20% 10%, #fff7fd, #fff2f8);
+    border:1px solid #fff; border-radius:14px;
+    padding:14px 14px 18px; color:#5a4452; line-height:1.7; font-size:14px;
+    box-shadow: 0 10px 20px rgba(255,122,162,.12) inset;
+    outline:none;
+    white-space: pre-wrap;
+  }
+  .diary:focus{ box-shadow: 0 0 0 3px rgba(255,122,162,.2), 0 10px 20px rgba(255,122,162,.12) inset; }
+  .upload-btn{
+    margin-left:8px; padding:4px 8px; border-radius:999px; cursor:pointer; font-weight:600; color:#a0516b;
+    background:#fff; border:1px solid #ffe3ee; box-shadow: 0 4px 10px rgba(255,122,162,.15);
+  }
+</style>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Us — Love Notes & Teddy Hugs</title>
+
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+  /* Envelope visibility + layering fixes */
+  .envelope{ cursor:pointer; }
+  .env-inner{ isolation:isolate; }            /* create a local stacking context */
+  .env-flap{ z-index:3; }                     /* flap above paper... */
+  .note{ z-index:2; position:absolute; }      /* ...but keep note above paper */
+  .envelope.open .env-flap{ pointer-events:none; }  /* when open, let clicks reach the note */
+</style>
+<style>
+  /* (gallery removed) */
+</style>
+
+  <style>
+    :root{
+      --bg1:#fff6fb;
+      --bg2:#fff8f0;
+      --ink:#352732;
+      --sub:#6c5966;
+      --rose:#ff7aa2;
+      --rose-2:#ff9dbb;
+      --lilac:#c6b8ff;
+      --mint:#b5ffe1;
+      --honey:#ffe7a3;
+      --glass:rgba(255,255,255,0.6);
+      --glass-2:rgba(255,255,255,0.35);
+      --shadow:0 22px 48px rgba(53,39,50,.12);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      height:100%; margin:0; color:var(--ink);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, var(--bg2), transparent 60%),
+        radial-gradient(1200px 800px at 80% 20%, #fff0f6, transparent 60%),
+        radial-gradient(1400px 900px at 50% 90%, #eefcff, transparent 60%),
+        linear-gradient(180deg, var(--bg1), #ffffff);
+      font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      overflow-x:hidden;
+    }
+
+    .wrap{ min-height:100%; display:grid; place-items:center; padding:48px 16px 84px; }
+    .card{
+      width:min(1060px, 95vw);
+      background:linear-gradient(180deg, var(--glass), var(--glass-2));
+      backdrop-filter: blur(14px);
+      border:1px solid rgba(255,255,255,.75);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden; position:relative; z-index:1;
+    }
+    .ribbon{
+      position:absolute; inset:auto 0 -1px 0; height:100px;
+      background:
+        radial-gradient(160px 50px at 15% 0%, #ffd9e5 0 60%, transparent 65%),
+        radial-gradient(200px 60px at 75% 0%, #e6e0ff 0 60%, transparent 65%),
+        linear-gradient(90deg, #ffe8f1, #f3eaff 55%, #eafff6);
+      opacity:.85; filter: blur(14px); pointer-events:none;
+    }
+
+    .header{ padding:52px 36px 12px; text-align:center; }
+    .title{ font-family:"Great Vibes", cursive; font-size: clamp(44px, 7.6vw, 86px); color:var(--ink); letter-spacing:.5px; margin:0 0 6px; line-height:1.05; }
+    .subtitle{ font-family:"Playfair Display", serif; font-weight:600; font-size: clamp(16px, 2.3vw, 22px); color:var(--sub); margin:0 0 18px; }
+    .divider{ display:flex; align-items:center; justify-content:center; gap:14px; margin:10px auto 2px; color:#d7819d; opacity:.9; }
+    .divider:before,.divider:after{ content:""; height:1px; width:100px; background:linear-gradient(90deg, transparent, #ffc1d5 50%, transparent); }
+
+    /* floating hearts + teddies */
+    .float-layer{ position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+    .float{ position:absolute; font-size:clamp(16px, 2.4vw, 28px); animation: floatUp linear forwards; opacity:.85; filter: drop-shadow(0 4px 12px rgba(255,122,162,.35)); }
+    @keyframes floatUp{
+      0% { transform:translateY(20vh) scale(.8) rotate(0deg); opacity:0 }
+      10%{ opacity:.85 }
+      100%{ transform:translateY(-110vh) scale(1.1) rotate(12deg); opacity:0 }
+    }
+
+    /* counters */
+    .stats{ display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; padding:18px 24px 6px; }
+    .stat{ background:rgba(255,255,255,.68); border:1px solid rgba(255,255,255,.95); border-radius:16px; padding:16px 14px; text-align:center; }
+    .num{ font-family:"Playfair Display", serif; font-size: clamp(22px, 4.5vw, 36px); font-weight:700; color:#b55578; display:block; line-height:1.1; }
+    .label{ font-size:12px; letter-spacing:.3px; color:var(--sub); }
+
+    .content{ padding:12px 26px 28px; display:grid; grid-template-columns: 1.2fr .8fr; gap:22px; }
+    @media (max-width: 960px){ .content{ grid-template-columns:1fr; } .stats{ grid-template-columns:repeat(3, minmax(0,1fr)); } }
+    @media (max-width: 560px){ .stats{ grid-template-columns:1fr 1fr; } }
+
+    .panel{ background:rgba(255,255,255,.75); border:1px solid rgba(255,255,255,.95); border-radius:18px; padding:18px; }
+
+    .quote{ font-family:"Playfair Display", serif; font-size:clamp(16px, 2.6vw, 22px); line-height:1.58; color:#5a4452; position:relative; }
+    .quote em{ color:#b55578; font-style:normal; }
+    .quote:before{ content:"“"; position:absolute; left:-8px; top:-16px; font-size:42px; color:#ffb3cb; opacity:.5; }
+
+    .actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+    .btn{ appearance:none; border:0; cursor:pointer; padding:12px 16px; border-radius:14px; background: linear-gradient(160deg, var(--rose), var(--rose-2)); color:white; font-weight:600; box-shadow: 0 10px 24px rgba(255,122,162,.28); transition: transform .12s ease, box-shadow .12s ease, filter .2s ease; }
+    .btn.alt{ background:linear-gradient(160deg, #a09bff, #c6b8ff); box-shadow: 0 10px 24px rgba(166,160,255,.25); color:#2b2446; }
+    .btn.honey{ background:linear-gradient(160deg, #ffd78a, var(--honey)); color:#744f00; box-shadow: 0 10px 24px rgba(255,197,108,.25); }
+    .btn.ghost{ background:rgba(255,255,255,.88); border:1px solid #ffe3ee; color:#b55578; box-shadow:none; }
+    .btn:hover{ transform: translateY(-2px); filter:saturate(1.05) }
+    .btn:active{ transform: translateY(0px) scale(.99) }
+
+    /* Love letters (envelopes) */
+    .letters{ display:grid; grid-template-columns: repeat(2, 1fr); gap:14px; margin-top:14px; }
+    @media (max-width: 720px){ .letters{ grid-template-columns:1fr; } }
+
+    .envelope{
+      perspective: 1200px;
+    }
+    .env-inner{
+      position:relative; height:210px; border-radius:16px; overflow:visible; transform-style:preserve-3d;
+    }
+    .env-paper{
+      position:absolute; inset:0; background: linear-gradient(180deg, #fffdf8, #fff6f9);
+      border:1px solid #fff; border-radius:16px; padding:16px 16px 18px; transform: translateZ(2px);
+      box-shadow: 0 14px 28px rgba(53,39,50,.12);
+    }
+    .env-flap{
+      position:absolute; left:0; right:0; top:-2px; height:60%;
+      background: linear-gradient(180deg, #ffe6ef, #ffd2e3);
+      border:1px solid #fff; border-bottom:0; border-radius:16px 16px 0 0;
+      transform-origin: top; transform: rotateX(0deg);
+      transition: transform .6s cubic-bezier(.2,.9,.2,1);
+      box-shadow: 0 12px 18px rgba(255,122,162,.15);
+    }
+    .envelope.open .env-flap{ transform: rotateX(-140deg); }
+    .wax{
+      position:absolute; left:50%; top:55%; transform:translate(-50%,-50%);
+      width:54px; height:54px; border-radius:999px; background: radial-gradient(circle at 35% 35%, #ff89a8, #ff5f92);
+      box-shadow: inset 0 2px 6px rgba(255,255,255,.55), 0 8px 16px rgba(255,122,162,.25);
+      display:grid; place-items:center; color:white; font-size:22px; z-index:2; transition: transform .25s ease;
+    }
+    .envelope.open .wax{ transform:translate(-50%,-50%) scale(0); }
+
+    .note{
+      position:absolute; inset:8px; margin-top:44px;
+      background: repeating-linear-gradient(#fffdf8, #fffdf8 26px, #ffeaf3 27px);
+      border:1px solid #fff; border-radius:12px; padding:14px 14px 16px; color:#5a4452; line-height:1.6; font-size:14px;
+      transform: translateY(10px); opacity:0; transition: all .5s cubic-bezier(.2,.9,.2,1);
+      overflow:auto;
+    }
+    .envelope.open .note{ transform: translateY(0px); opacity:1; }
+
+    .note .sig{ display:block; margin-top:8px; color:#b55578; font-weight:600; }
+
+    /* Teddy gifs gallery */
+    .teddy-wrap{ margin-top:10px; }
+    .teddy-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    .teddy-head .tag{ background:#fff3f8; border:1px solid #fff; color:#a0516b; padding:6px 10px; border-radius:999px; font-size:12px; }
+
+    .teddy-row{
+      display:grid; grid-auto-flow:column; grid-auto-columns: 70%;
+      gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:6px;
+    }
+    @media (min-width: 740px){ .teddy-row{ grid-auto-columns: 38%; } }
+    @media (min-width: 980px){ .teddy-row{ grid-auto-columns: 28%; } }
+    .teddy{
+      scroll-snap-align:center; background:rgba(255,255,255,.86); border:1px solid #fff; border-radius:16px; overflow:hidden; position:relative;
+      box-shadow: 0 8px 18px rgba(53,39,50,.10);
+    }
+  .teddy.drag{
+    outline: 2px dashed #ff9dbb;
+    outline-offset: -8px;
+  }
+    .teddy img{ display:block; width:100%; height:260px; object-fit:cover; }
+    .tcap{
+      position:absolute; inset:auto 8px 8px 8px; background:rgba(255,255,255,.78); border:1px solid #fff; border-radius:12px; padding:6px 9px; font-size:12px; color:#7a5a69;
+    }
+
+  /* Ensure Tenor embeds are visible and sized inside cards */
+  .teddy .tenor-gif-embed{
+    display:block;
+    width:100%;
+    aspect-ratio: 1 / 1;
+    min-height: 240px;
+    background:#fff;
+    border-radius:12px;
+    overflow:hidden;
+  }
+
+    /* Sticky mini notes */
+    .stickies{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:12px; }
+    @media (max-width: 720px){ .stickies{ grid-template-columns:1fr 1fr; } }
+    @media (max-width: 460px){ .stickies{ grid-template-columns:1fr; } }
+    .sticky{
+      background: var(--honey);
+      background: radial-gradient(120% 140% at 20% 10%, #fff4c7, #ffe39f);
+      border:1px solid #fff7d6; color:#5a4a22; border-radius:12px 12px 22px 12px;
+      padding:12px 12px 14px; min-height:84px; position:relative; box-shadow:0 10px 20px rgba(255,209,102,.18);
+    }
+    .sticky:before{
+      content:"📌"; position:absolute; right:10px; top:-8px; transform:rotate(8deg); font-size:20px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.12));
+    }
+
+    /* footer */
+    .footer{ display:flex; align-items:center; justify-content:center; gap:10px; padding:14px 18px 20px; color:#8a6c79; font-size:13px; }
+    .tiny-heart{ filter: drop-shadow(0 3px 8px rgba(255,122,162,.3)); }
+
+    /* cute stickers floating softly */
+    .sticker{
+      position:absolute; z-index:0; opacity:.22; transform:rotate(-8deg);
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.06));
+      animation: bob 6s ease-in-out infinite;
+    }
+    @keyframes bob{
+      0%,100%{ transform: translateY(0) rotate(-8deg) }
+      50%{ transform: translateY(-8px) rotate(-6deg) }
+    }
+  </style>
+</head>
+<script>
+  (function(){
+    // Ensure extra keyframes exist
+    if(!document.getElementById("multi-float-keyframes")){
+      const s = document.createElement("style");
+      s.id = "multi-float-keyframes";
+      s.textContent = `
+        @keyframes floatDown{0%{transform:translateY(-20vh) scale(.8) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translateY(110vh) scale(1.1) rotate(12deg);opacity:0}}
+        @keyframes floatRight{0%{transform:translateX(-20vw) scale(.8) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translateX(110vw) scale(1.1) rotate(12deg);opacity:0}}
+        @keyframes floatLeft{0%{transform:translateX(20vw) scale(.8) rotate(0);opacity:0}10%{opacity:.85}100%{transform:translateX(-110vw) scale(1.1) rotate(12deg);opacity:0}}
+      `;
+      document.head.appendChild(s);
+    }
+
+    const floatRoot = document.getElementById("float") || document.body;
+
+    function createFloatFrom(edge){
+      const el = document.createElement("div");
+      el.className = "float";
+      el.textContent = FLOAT_EMOJIS[Math.floor(Math.random()*FLOAT_EMOJIS.length)];
+      el.style.color = FLOAT_COLORS[Math.floor(Math.random()*FLOAT_COLORS.length)];
+      el.style.position = "fixed";
+      el.style.zIndex = "9";
+      el.style.pointerEvents = "none";
+      const duration = 6 + Math.random()*5;
+      el.style.animationDuration = duration + "s";
+      el.style.filter = "drop-shadow(0 4px 12px rgba(255,122,162,.35))";
+      const scale = 0.7 + Math.random()*0.6;
+      const rot = -10 + Math.random()*20;
+
+      if(edge === "top"){
+        el.style.left = (Math.random()*100) + "vw";
+        el.style.top = "-10vh";
+        el.style.animationName = "floatDown";
+      } else if(edge === "left"){
+        el.style.top = (Math.random()*100) + "vh";
+        el.style.left = "-10vw";
+        el.style.animationName = "floatRight";
+      } else if(edge === "right"){
+        el.style.top = (Math.random()*100) + "vh";
+        el.style.left = "110vw";
+        el.style.animationName = "floatLeft";
+      } else {
+        el.style.left = (Math.random()*100) + "vw";
+        el.style.bottom = "-10vh";
+        el.style.animationName = "floatUp";
+      }
+
+      el.style.transform = `scale(${scale}) rotate(${rot}deg)`;
+      floatRoot.appendChild(el);
+      setTimeout(()=> el.remove(), duration*1000);
+    }
+
+    // Override Release hearts to burst from all sides
+    (function replaceRelease(){
+      const oldBtn = document.getElementById("btnHearts");
+      if(!oldBtn) return;
+      const btn = oldBtn.cloneNode(true);
+      oldBtn.parentNode.replaceChild(btn, oldBtn);
+      btn.addEventListener("click", ()=>{
+        const edges = ["top","bottom","left","right"];
+        const total = 160;     // more = denser burst
+        const cadence = 18;    // smaller = faster
+        for(let i=0;i<total;i++){
+          setTimeout(()=> createFloatFrom(edges[Math.floor(Math.random()*edges.length)]), i*cadence);
+        }
+      });
+    })();
+
+    // Make ambient floats come from random edges (not just bottom)
+    (function replaceAmbient(){
+      // try to clear any old ambient interval if it exists in global
+      try{ if(window.ambient){ clearInterval(window.ambient); } }catch(e){}
+      window.ambient = setInterval(()=>{
+        const edges = ["top","bottom","left","right"];
+        createFloatFrom(edges[Math.floor(Math.random()*edges.length)]);
+      }, 1200);
+    })();
+  })();
+</script>
+<script>
+  (function(){
+    // Put your GIF URLs here (local paths or full URLs)
+    const MY_TEDDY_GIFS = [
+      "https://media.tenor.com/hh2Y1wQqG6AAAAAC/bear-hug-cute.gif",
+      "https://media.tenor.com/0rX1e2C9kLsAAAAC/teddy-bear-blush.gif",
+      "https://media.tenor.com/S8y7u1p0gK8AAAAC/teddy-love.gif",
+      "https://media.tenor.com/sMI0wV9egE4AAAAC/sleepy-teddy.gif"
+    ];
+    const FALLBACK = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Teddy_bear.svg/512px-Teddy_bear.svg.png";
+
+    function tenorIdFromUrl(url){
+      const m = url.match(/tenor\.com\/view\/[^-]+-(\d+)/i);
+      return m ? m[1] : null;
+    }
+
+    function buildTenorEmbedDiv(id){
+      const div = document.createElement('div');
+      div.className = 'tenor-gif-embed';
+      div.setAttribute('data-postid', id);
+      div.setAttribute('data-share-method', 'host');
+      div.setAttribute('data-aspect-ratio', '1');
+      div.setAttribute('data-width', '100%');
+      return div;
+    }
+
+    function ensureTenorScript(cb){
+      const existing = document.querySelector('script[src="https://tenor.com/embed.js"]');
+      if(existing){ if(cb) setTimeout(cb, 50); return; }
+      const s = document.createElement('script');
+      s.src = 'https://tenor.com/embed.js';
+      s.async = true;
+      if(cb){ s.addEventListener('load', ()=> setTimeout(cb, 50)); }
+      document.body.appendChild(s);
+    }
+
+    // Existing auto-fill (kept for the top gallery if present)
+    const figures = document.querySelectorAll('.teddy-row .teddy');
+    figures.forEach((fig, i) => {
+      const url = (MY_TEDDY_GIFS[i] || "").trim();
+      const cap = fig.querySelector('.tcap');
+      const img = fig.querySelector('img');
+
+      if(url && /(\.gif|\.webp)(\?|$)/i.test(url)){
+        if(img){
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.referrerPolicy = 'no-referrer';
+          img.src = url;
+          img.onerror = function(){ this.onerror = null; this.src = FALLBACK; };
+        }
+      } else if(url && /tenor\.com\/view\//i.test(url)){
+        const id = tenorIdFromUrl(url);
+        if(id){
+          const embed = buildTenorEmbedDiv(id);
+          if(img){ img.replaceWith(embed); }
+          else { fig.insertBefore(embed, cap || null); }
+          ensureTenorScript(()=>{
+            try{
+              if(window.Tenor){ window.Tenor.init(); }
+            }catch(e){}
+          });
+        } else if(img) {
+          img.src = FALLBACK;
+        }
+      } else if(img) {
+        img.src = FALLBACK;
+      }
+    });
+
+    // If you want a tidy grid instead of horizontal scroll, keep this:
+    // It’s already in your CSS, but in case the other style wins, we enforce:
+    const row = document.querySelector(".teddy-row");
+    if(row){
+      row.style.display = "grid";
+      row.style.gridTemplateColumns = "repeat(auto-fit, minmax(240px,1fr))";
+      row.style.gap = "14px";
+      row.style.overflow = "visible";
+    }
+
+    // 2x2 custom upload grid handlers
+    document.querySelectorAll('.teddy-uploader').forEach(input =>{
+      input.addEventListener('change', (e)=>{
+        const file = e.target.files && e.target.files[0];
+        const targetId = e.target.getAttribute('data-target');
+        if(!file || !targetId) return;
+        const img = document.getElementById(targetId);
+        if(!img) return;
+        const url = URL.createObjectURL(file);
+        img.src = url;
+        img.onload = ()=> URL.revokeObjectURL(url);
+      });
+    });
+
+    // Paste to first slot (teddy-slot-1)
+    window.addEventListener('paste', (e)=>{
+      const items = e.clipboardData && e.clipboardData.items;
+      if(!items) return;
+      for(const it of items){
+        if(it.kind === 'file'){
+          const file = it.getAsFile();
+          if(!file) continue;
+          const img = document.getElementById('teddy-slot-1');
+          if(!img) return;
+          const url = URL.createObjectURL(file);
+          img.src = url;
+          img.onload = ()=> URL.revokeObjectURL(url);
+          break;
+        }
+      }
+    });
+
+    // Drag & drop onto any teddy card
+    document.querySelectorAll('.teddy-grid .teddy').forEach(card =>{
+      const img = card.querySelector('img');
+      if(!img) return;
+      card.addEventListener('dragover', (ev)=>{ ev.preventDefault(); card.classList.add('drag'); });
+      card.addEventListener('dragleave', ()=> card.classList.remove('drag'));
+      card.addEventListener('drop', (ev)=>{
+        ev.preventDefault(); card.classList.remove('drag');
+        const file = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+        if(!file) return;
+        const url = URL.createObjectURL(file);
+        img.src = url;
+        img.onload = ()=> URL.revokeObjectURL(url);
+      });
+    });
+  })();
+</script>
+<body>
+  <div class="float-layer" aria-hidden="true" id="float"></div>
+
+  <div class="wrap">
+    <main class="card" role="main" aria-label="Our love page">
+      <img class="sticker" alt="" src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Heart_corazon.svg" width="84" style="left:-20px; top:40px;">
+      <img class="sticker" alt="" src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Heart_corazon.svg" width="70" style="right:-10px; top:120px; transform:rotate(10deg); opacity:.18;">
+      <img class="sticker" alt="" src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Star_icon-72a7cf.svg" width="64" style="left:20px; bottom:160px; opacity:.18;">
+
+      <div class="header">
+        <h1 class="title">Minnie <span style="color:#ff7aa2">&</span> Yashu</h1>
+        <p class="subtitle">MAY SEE FIRWORKS TOGETHER</p>
+        <div class="divider">🧸 ❤︎ 🧸</div>
+      </div>
+
+      <section class="stats" aria-label="Counters">
+        <div class="stat">
+          <span class="num" id="days">0</span>
+          <span class="label">Days in love</span>
+        </div>
+        <div class="stat">
+          <span class="num" id="hours">0</span>
+          <span class="label">Hours of giggles</span>
+        </div>
+        <div class="stat">
+          <span class="num" id="mins">0</span>
+          <span class="label">Minutes of butterflies felt by me because of you</span>
+        </div>
+      </section>
+
+      <section class="content">
+        <div class="panel">
+          <p class="quote">
+            I used to think love was a song, and then I met you and it became the silence between the notes. <em>Where everything feels like home.</em>
+          </p>
+
+          <div class="actions">
+            <button class="btn" id="btnHearts" aria-label="Release hearts">Release hearts</button>
+            <button class="btn alt" id="btnSurprise" aria-label="Tiny surprise">Tiny surprise</button>
+              <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  </style>
+</head>
+<body>
+
+  <script>
+    document.getElementById('btnSurprise').addEventListener('click', function () {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    });
+  </script>
+            <button class="btn honey" id="btnLetters" aria-label="Open all letters">Open all letters ✉️</button>
+            <button class="btn ghost" id="btnScroll" aria-label="Scroll to letters">See letters ↓</button>
+          </div>
+
+          <!-- Love letters -->
+          <div class="letters" id="letters" aria-label="Love letters">
+            <div class="envelope">
+              <div class="env-inner">
+                <div class="env-flap"></div>
+                <div class="wax">💌</div>
+                <div class="env-paper"></div>
+                <div class="note">
+                  Your laugh is my favorite melody, your hand my favorite place. Thank you for making ordinary moments feel like fireworks.
+                  <span class="sig">— A</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="envelope">
+              <div class="env-inner">
+                <div class="env-flap" style="background:linear-gradient(180deg,#e7ddff,#d3c5ff)"></div>
+                <div class="wax" style="background: radial-gradient(circle at 35% 35%, #a99fff, #8e83ff)">💟</div>
+                <div class="env-paper"></div>
+                <div class="note">
+                  If I could fold the sky into a note, I’d write our names on every star and send it back to you.
+                  <span class="sig">— N</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="envelope">
+              <div class="env-inner">
+                <div class="env-flap" style="background:linear-gradient(180deg,#ffe9b6,#ffd387)"></div>
+                <div class="wax" style="background: radial-gradient(circle at 35% 35%, #ffb65a, #ffa234)">🧸</div>
+                <div class="env-paper"></div>
+                <div class="note">
+                  Promise: warm hugs on cold days, forehead kisses on busy days, and patience on the messy days.
+                  <span class="sig">— Always</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="envelope">
+              <div class="env-inner">
+                <div class="env-flap" style="background:linear-gradient(180deg,#c9ffe8,#aefadd)"></div>
+                <div class="wax" style="background: radial-gradient(circle at 35% 35%, #6fe7b6, #43d7a0)">🌿</div>
+                <div class="env-paper"></div>
+                <div class="note">
+                  Here's to tiny adventures: shared earbuds, split desserts, and racing to touch the next lamp post first.
+                  <span class="sig">— Us</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sticky mini notes -->
+          <div class="stickies" aria-label="Mini love notes">
+            <div class="sticky">You + Me = standards💗.</div>
+            <div class="sticky" style="background:radial-gradient(120% 140% at 20% 10%, #ffe3f2, #ffc4e2); color:#6a304a; border-color:#fff;">
+              dekhlo achaa ladkaa mai!! thoda emotional pr caring 🥹
+            </div>
+            <div class="sticky">I like us. A lot. Like, a lot a lot.💗💗</div>
+          </div>
+        </div>
+
+        <!-- Clean replacement: balanced panel to keep layout aligned -->
+        <div class="panel" id="favorites">
+          <div class="teddy-head" style="margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+            <div style="font-family:'Playfair Display',serif; font-weight:700; color:#6c5966;">Our Favorites</div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn alt" id="favReset" style="padding:8px 12px;">Clear</button>
+            </div>
+          </div>
+          <div id="favJournal" class="diary" contenteditable="true" spellcheck="false" aria-label="Our favorites journal"></div>
+          <div style="margin-top:8px; font-size:12px; color:#8a6c79;">Type here like a cute diary.</div>
+        </div>
+      </section>
+
+      <div class="footer">
+        Made with <span class="tiny-heart">💗</span> + 🧸 by us, for us
+      </div>
+
+      <div class="ribbon" aria-hidden="true"></div>
+    </main>
+  </div>
+
+  <script>
+    // ===== Customize here =====
+    const COUPLE_START_DATE = new Date("2022-02-14T00:00:00");
+    const FLOAT_EMOJIS = ["❤","💗","💕","💖","💞","🩷","🧸"];
+    const FLOAT_COLORS = ["#ff7aa2","#ff9dbb","#c6b8ff","#b5ffe1","#ffd4e2","#ffc1d5","#ffbb6e"];
+
+    // Counters
+    const daysEl = document.getElementById("days");
+    const hoursEl = document.getElementById("hours");
+    const minsEl  = document.getElementById("mins");
+
+    function updateCounters(){
+      const now = new Date();
+      const diffMs = now - COUPLE_START_DATE;
+      const minutes = Math.floor(2456900);
+      const hours   = Math.floor(diffMs / 0);
+      const days    = Math.floor(0);
+      daysEl.textContent  = days.toLocaleString();
+      hoursEl.textContent = hours.toLocaleString();
+      minsEl.textContent  = minutes.toLocaleString();
+    }
+    updateCounters();
+    setInterval(updateCounters, 30_000);
+
+    // Floating hearts + teddies
+    const floatRoot = document.getElementById("float");
+    function createFloat(x=null){
+      const el = document.createElement("div");
+      el.className = "float";
+      el.textContent = FLOAT_EMOJIS[Math.floor(Math.random()*FLOAT_EMOJIS.length)];
+      const left = x ?? Math.random()*100;
+      el.style.left = left + "vw";
+      el.style.bottom = "-10vh";
+      el.style.color = FLOAT_COLORS[Math.floor(Math.random()*FLOAT_COLORS.length)];
+      const duration = 7 + Math.random()*5;
+      el.style.animationDuration = duration + "s";
+      el.style.transform = `translateY(20vh) scale(${0.7 + Math.random()*0.6}) rotate(${(-10+Math.random()*20)}deg)`;
+      floatRoot.appendChild(el);
+      document.getElementById("btnHearts").addEventListener("click", () => {
+  for (let i = 0; i < 20; i++) {
+    // Create bursts from top, left, and right
+    setTimeout(() => {
+      createFloatFrom("top");
+      createFloatFrom("left");
+      createFloatFrom("right");
+    }, i * 150); // burst delay
+  }
+});
+
+    }
+    let ambient = setInterval(()=> createFloat(), 210);
+
+    // Buttons
+    document.getElementById("btnHearts").addEventListener("click", ()=>{
+      for(let i=0;i<10000;i++){
+        setTimeout(()=>{
+      createFloatFrom("top");
+      createFloatFrom("left");
+      createFloatFrom("right");
+    },  i*1);
+      }
+    });
+    document.getElementById("btnSurprise").addEventListener("click", (e)=>{
+      const btn = e.currentTarget;
+      btn.animate(
+        [
+          { transform:"scale(1)", filter:"saturate(1)" },
+          { transform:"scale(1.07)", filter:"saturate(1.2)" },
+          { transform:"scale(1)", filter:"saturate(1)" }
+        ],
+        { duration:360, easing:"cubic-bezier(.2,.9,.2,1)" }
+      );
+      for(let i=0;i<8;i++){
+        setTimeout(()=> createFloat(20 + Math.random()*60), i*70);
+      }
+    });
+
+    // Smooth scroll to letters
+    document.getElementById("btnScroll").addEventListener("click", ()=>{
+      document.getElementById("letters").scrollIntoView({behavior:"smooth", block:"start"});
+    });
+    // Favorites: single cute diary with localStorage persistence
+    const FAV_KEY = 'our_favorites_diary_v1';
+    const favDiary = document.getElementById('favJournal');
+    const favReset = document.getElementById('favReset');
+    const defaultText = 'Things we both love...\n• watching anime! \n• Long walks\n• food🌸\n• yapping✨';
+
+    function loadDiary(){
+      try{ return localStorage.getItem(FAV_KEY) || defaultText; }
+      catch(e){ return defaultText; }
+    }
+    function saveDiary(text){
+      try{ localStorage.setItem(FAV_KEY, text); }catch(e){}
+    }
+
+    favDiary.textContent = loadDiary();
+    let saveTimer;
+    favDiary.addEventListener('input', ()=>{
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(()=> saveDiary(favDiary.textContent.trim()), 250);
+    });
+    favReset.addEventListener('click', ()=>{
+      favDiary.textContent = defaultText;
+      saveDiary(defaultText);
+      favDiary.focus();
+    });
+
+    // Open all letters
+    document.getElementById("btnLetters").addEventListener("click", ()=>{
+      document.querySelectorAll(".envelope").forEach(env => env.classList.add("open"));
+    });
+
+    // Envelope toggle
+    document.querySelectorAll(".envelope").forEach(env=>{
+      env.addEventListener("click", ()=>{
+        env.classList.toggle("open");
+      });
+    });
+
+    // Ambient click floats
+    window.addEventListener("click", (e)=>{
+      const tag = (e.target.tagName || "").toLowerCase();
+      if(["button","a","input","textarea","select","img","figure"].includes(tag)) return;
+      const vw = (e.clientX / window.innerWidth) * 100;
+      for(let i=0;i<3;i++){
+        setTimeout(()=> createFloat(vw + (-2 + Math.random()*4)), i*80);
+      }
+    }, { passive:true });
+
+    document.addEventListener("visibilitychange", ()=>{
+      if(document.hidden){ clearInterval(ambient); }
+      else { ambient = setInterval(()=> createFloat(), 1800); }
+    });
+  </script>
+  
+
+  <!-- Added: auto-fill and open envelopes (non-destructive) -->
+  <script>
+    (function(){
+      const letters = [
+        `<p><b>. If the day forgets to be kind, remember there’s a tiny sunrise tucked into your smile.</p>
+         <p>princess💗</p>
+         <p></p>
+         <span class="sig">— for YOU<b></span>`,
+
+        `<p><b>i feel blessed ki mai tumhe jaanta aur tum meri pasand .</p>
+         <p>I wish we run off to japan to see FIREWORKS sunna hai joh voh dekhte they stay tohether</p>
+         <p>P.S. ALSO You’re my favorite hello and the softest goodnight.<b></p>
+         <span class="sig">— Dream</span>`,
+
+        `<p><b>Proise checklist: I’ll love you in the small ways so the big ones feel easy.</p>
+         <p>I’ll save you the last bite of pizza and kfc, and a space in every plan I make. You first, always.</p>
+         <p>We’re team—cute.</p>
+         <span class="sig">— Always<b></span>`,
+
+        `<p><b>Here’s to tiny adventures: racing to the next lamp post, naming clouds, and splitting dessert like it’s a ceremony with a secret handshake.</p>
+         <p>Let’s keep collecting little moments—your sleepy voice, our inside jokes,and the shows we binge watch.</p>
+         <p>Future plan: more polaroids, more giggles, more “one more minute.” Deal?</p>
+         <span class="sig">— Us<b></span>`
+      ];
+
+      const envelopes = document.querySelectorAll(".letters .envelope");
+      const notes = document.querySelectorAll(".letters .envelope .note");
+      notes.forEach((el, i) => { el.innerHTML = letters[i % letters.length]; });
+      
+    })();
+    
+  </script>
+</body>
+</html>
